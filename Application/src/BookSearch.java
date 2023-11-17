@@ -2,7 +2,7 @@
  * The BookSearch class represents the GUI for searching books in the Library Management System.
  * Users can search for books by entering the ISBN, Author name, or Title in the provided text field.
  * The class uses Java Swing for creating a graphical user interface and interacts with the underlying database.
- * 
+ *
  * @createdBy: Alper Duru
  * @createdDate: 11/11/2023
  */
@@ -10,7 +10,8 @@
 // Import libraries
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.ArrayList;
 import javax.swing.*;
 import javax.swing.border.*;
 
@@ -22,16 +23,19 @@ public class BookSearch extends JFrame
     // Class variables
     JFrame homePageFrame;
     JPanel homePagePanel;
+    private Connection connection; //added connection to access database
+
 
     /**
      * Constructor for BookSearch class.
      *
      * @throws SQLException if a database access error occurs
      */
-    BookSearch() throws SQLException
-    {
+    BookSearch(Connection connection) throws SQLException {
+        this.connection = connection;
         buildUserInterface();
     }
+
 
     /**
      * The main method to launch the BookSearch application.
@@ -40,15 +44,13 @@ public class BookSearch extends JFrame
      */
     public static void main(String[] args)
     {
-        EventQueue.invokeLater(new Runnable()
-        {
-            public void run()
-            {
-                try
-                {
-                    new BookSearch();
-                } catch (Exception e)
-                {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/library",
+                            "root", "Narutoget05?"); //add your password
+                    new BookSearch(connection);
+                } catch (SQLException e) {
                     e.printStackTrace();
                 }
             }
@@ -127,12 +129,63 @@ public class BookSearch extends JFrame
         BookSearchText.setColumns(20);
 
         JButton BookSearch = new JButton("Search...");
-        BookSearch.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
-                // add your program logic here
+        BookSearch.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e){
+            String searchText = BookSearchText.getText(); // Get the text from the search field
+            //BookSearch QUERY
+                try {
+            String query = "SELECT BOOKS.Isbn, BOOKS.Title, GROUP_CONCAT(AUTHORS.Name) AS Authors, " +
+                    "CASE WHEN BOOK_LOANS.Isbn IS NULL THEN 'Available' ELSE 'Checked Out' END AS Availability " +
+                    "FROM BOOKS " +
+                    "LEFT JOIN BOOK_AUTHORS ON BOOKS.Isbn = BOOK_AUTHORS.Isbn " +
+                    "LEFT JOIN AUTHORS ON BOOK_AUTHORS.Author_id = AUTHORS.Author_id " +
+                    "LEFT JOIN BOOK_LOANS ON BOOKS.Isbn = BOOK_LOANS.Isbn " +
+                    "WHERE LOWER(BOOKS.Title) LIKE LOWER(?) OR LOWER(AUTHORS.Name) LIKE LOWER(?) OR BOOKS.Isbn = ? " +
+                    "GROUP BY BOOKS.Isbn";
+
+            PreparedStatement input = connection.prepareStatement(query); //safely handles input
+            input.setString(1, "%" + searchText + "%");
+                    input.setString(2, "%" + searchText + "%");
+            try {
+                long isbn = Long.parseLong(searchText);
+                input.setLong(3, isbn);
+            } catch (NumberFormatException ex) {
+                input.setLong(3, -1); // Set an invalid ISBN if not numeric
             }
+
+            ResultSet resultSet = input.executeQuery(); //sets input as result and display
+            ArrayList<String[]> searchResults = new ArrayList<>(); //hold search result
+            while (resultSet.next()) {
+                String[] bookInfo = new String[4];
+                bookInfo[0] = String.valueOf(resultSet.getLong("Isbn"));
+                bookInfo[1] = resultSet.getString("Title");
+                bookInfo[2] = resultSet.getString("Authors");
+                bookInfo[3] = resultSet.getString("Availability");
+                searchResults.add(bookInfo);
+            }
+            input.close();
+
+            //Displays the search results
+            //you can modify here to change format
+            JTextArea searchResultArea = new JTextArea();
+            for (String[] bookInfo : searchResults) {
+                searchResultArea.append("ISBN: " + bookInfo[0] + "\n");
+                searchResultArea.append("Title: " + bookInfo[1] + "\n");
+                searchResultArea.append("Authors: " + bookInfo[2] + "\n");
+                searchResultArea.append("Availability: " + bookInfo[3] + "\n\n");
+            }
+
+            //Show results window
+            JFrame resultFrame = new JFrame("Search Results");
+            resultFrame.add(new JScrollPane(searchResultArea));
+            resultFrame.setSize(600, 400);
+            resultFrame.setLocationRelativeTo(null);
+            resultFrame.setVisible(true);
+
+        } catch(SQLException ex) {
+            ex.printStackTrace();
+            }
+        }
         });
 
         GridBagConstraints gbc_btnBookSearch = new GridBagConstraints();
