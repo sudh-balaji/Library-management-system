@@ -1,4 +1,4 @@
-**
+/**
  * The HomePage class represents the main page of the Library Management System GUI.
  * It includes functionalities such as searching for a book, checking in and out, managing borrowers, and handling fines.
  * The class uses Java Swing for creating a graphical user interface.
@@ -177,8 +177,8 @@ public class HomePage extends JFrame {
 
                 Fines finesManager = new Fines (connection);
 
-                try {
-                    finesManager.displayFines();
+                try { //show unpaid fines
+                    finesManager.displayFines(false);
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                 }
