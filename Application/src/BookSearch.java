@@ -48,7 +48,7 @@ public class BookSearch extends JFrame
             public void run() {
                 try {
                     Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/library",
-                            "root", "Narutoget05?"); //add your password
+                            "root", "AddUrPassWord"); //add your password
                     new BookSearch(connection);
                 } catch (SQLException e) {
                     e.printStackTrace();
