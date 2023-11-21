@@ -13,6 +13,16 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import java.awt.*;
+import java.sql.*;
+import java.util.Calendar;
+import java.util.concurrent.Executors;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
 public class Fines extends JFrame {
     private Connection connection;
     public Fines(Connection connection) {
@@ -121,7 +131,7 @@ public class Fines extends JFrame {
                 "WHERE 1=1 " + filterCondition +
                 "GROUP BY B.Card_id HAVING Total_Fine_Amount > 0";
     }
-        //Method to display fines based on filter condition
+    //Method to display fines based on filter condition
     public void displayFines(boolean showUnpaidFines) throws SQLException {
         try (Statement statement = connection.createStatement()) {
             String filterCondition = showUnpaidFines ? "AND F.paid = FALSE " : "";
@@ -152,7 +162,7 @@ public class Fines extends JFrame {
             ex.printStackTrace();
         }
     }
-    private long calculatesFinesDelay() { //calculates fines based on library hours (9am-5pm)
+    private long calculatesFinesDelay() { //calculates fines based on library closed hours (9am-5pm)
         Calendar calendar = Calendar.getInstance();
         long now = calendar.getTimeInMillis();
         //this ensures that the schedule runs after it closes and not charge during open hours.
@@ -216,8 +226,8 @@ public class Fines extends JFrame {
         JButton calculateButton = new JButton("Calculate Fines");
         JButton payFineButton = new JButton("Pay Fine");
         JButton displayButton = new JButton("Display Fines");
-        JButton startUpdatesButton = new JButton("Start Daily Updates");
-        JButton updateFinesButton = new JButton("Update Fines Manually");
+        //JButton startUpdatesButton = new JButton("Start Daily Updates");
+        JButton updateFinesButton = new JButton("Update Current Fines");
 
         updateFinesButton.addActionListener(e -> {
             if (isLibraryClosed()) {
@@ -236,7 +246,7 @@ public class Fines extends JFrame {
         buttonPanel.add(calculateButton);
         buttonPanel.add(payFineButton);
         buttonPanel.add(displayButton);
-        buttonPanel.add(startUpdatesButton);
+       // buttonPanel.add(startUpdatesButton);
         buttonPanel.add(updateFinesButton);
 
         homePagePanel.add(buttonPanel, BorderLayout.SOUTH);
@@ -259,9 +269,9 @@ public class Fines extends JFrame {
                 handleException(ex, "Error displaying fines");
             }
         });
-        startUpdatesButton.addActionListener(e -> {
+        /*startUpdatesButton.addActionListener(e -> {
             startDailyUpdates();
-        });
+        });*/
         finesFrame.add(homePagePanel);
         finesFrame.setVisible(true);
     }
@@ -275,7 +285,7 @@ public class Fines extends JFrame {
         try {
             String url = "jdbc:mysql://localhost:3306/library";
             String user = "root";
-            String password = "AddURPassword"; //add your password here
+            String password = "Narutoget05?"; //add your password here
 
             Connection connection = DriverManager.getConnection(url, user, password);
             Fines finesManager = new Fines(connection);
@@ -283,11 +293,12 @@ public class Fines extends JFrame {
             finesManager.calculateAndSetFines(); //get the calculates fines
             finesManager.displayFines(false); //display the fines
 
-            finesManager.payFine(123); // Example of paying a fine for loan ID 123
+            //finesManager.payFine(123); // Example of paying a fine for loan ID 123
 
             connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+}
 }
