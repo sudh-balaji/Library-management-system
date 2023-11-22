@@ -23,13 +23,12 @@ public class HomePage extends JFrame {
     JFrame homePageFrame;
     JPanel homePagePanel;
     JLabel homePageHeader;
-    private MyJDBC myJDBC; //added MyJDBC for database connection
+    private MyJDBC myJDBC; // added MyJDBC for database connection
 
     /**
      * Constructor for HomePage class.
      */
-    HomePage()
-    {
+    HomePage() {
         myJDBC = new MyJDBC(); // Create an instance of MyJDBC
 
         buildUserInterface();
@@ -40,16 +39,14 @@ public class HomePage extends JFrame {
      *
      * @param args Command line arguments
      */
-    public static void main(String[] args)
-    {
+    public static void main(String[] args) {
         new HomePage();
     }
 
     /**
      * Prepares the graphical user interface.
      */
-    void buildUserInterface()
-    {
+    void buildUserInterface() {
         // Frame
         homePageFrame = new JFrame("Library Management System");
         homePageFrame.setSize(1000, 300);
@@ -79,12 +76,10 @@ public class HomePage extends JFrame {
         // Search Button
         // --------------------------------------------------------------------
         JButton search = new JButton("Search");
-        search.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
+        search.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
                 homePageFrame.setVisible(false);
-                Connection connection = myJDBC.getConnection(); //get MySQL connection
+                Connection connection = myJDBC.getConnection(); // get MySQL connection
                 try {
                     BookSearch bookSearch = new BookSearch(connection); // Pass the connection
                 } catch (SQLException e1) {
@@ -99,16 +94,14 @@ public class HomePage extends JFrame {
         gbc_btnSearch.gridx = 0;
         gbc_btnSearch.gridy = 0;
         gbc_btnSearch.weightx = 0.5;
-        //gbc_btnSearch.gridwidth = 2;
+        // gbc_btnSearch.gridwidth = 2;
         homePagePanel.add(search, gbc_btnSearch);
 
         // Check Out
         // --------------------------------------------------------------------
         JButton checkOut = new JButton("Check Out");
-        checkOut.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
+        checkOut.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
                 homePageFrame.setVisible(false);
                 // call your function here
             }
@@ -120,18 +113,17 @@ public class HomePage extends JFrame {
         gbc_btnCheckOut.gridx = 1;
         gbc_btnCheckOut.gridy = 0;
         gbc_btnCheckOut.weightx = 0.5;
-        //gbc_btnCheckOut.gridwidth = 2;
+        // gbc_btnCheckOut.gridwidth = 2;
         homePagePanel.add(checkOut, gbc_btnCheckOut);
 
         // Check In
         // --------------------------------------------------------------------
         JButton checkIn = new JButton("Check In");
-        checkIn.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
+        checkIn.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
                 homePageFrame.setVisible(false);
                 // call your function here
+                new CheckInHandler();
             }
         });
 
@@ -141,16 +133,14 @@ public class HomePage extends JFrame {
         gbc_btnCheckIn.gridx = 2;
         gbc_btnCheckIn.gridy = 0;
         gbc_btnCheckIn.weightx = 0.5;
-        //gbc_btnCheckIn.gridwidth = 2;
+        // gbc_btnCheckIn.gridwidth = 2;
         homePagePanel.add(checkIn, gbc_btnCheckIn);
 
         // Add Borrower
         // --------------------------------------------------------------------
         JButton newBorrower = new JButton("New Borrower");
-        newBorrower.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
+        newBorrower.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
                 homePageFrame.setVisible(false);
                 // call your function here
             }
@@ -162,22 +152,20 @@ public class HomePage extends JFrame {
         gbc_btnNewBorrower.gridx = 3;
         gbc_btnNewBorrower.gridy = 0;
         gbc_btnNewBorrower.weightx = 0.5;
-        //gbc_btnNewBorrower.gridwidth = 2;
+        // gbc_btnNewBorrower.gridwidth = 2;
         homePagePanel.add(newBorrower, gbc_btnNewBorrower);
 
         // Handle Fines
         // --------------------------------------------------------------------
         JButton fines = new JButton("Fines");
-        fines.addActionListener(new ActionListener()
-        {
-            public void actionPerformed(ActionEvent e)
-            {
+        fines.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
                 homePageFrame.setVisible(false);
                 Connection connection = myJDBC.getConnection(); // Get the connection from MyJDBC
 
-                Fines finesManager = new Fines (connection);
+                Fines finesManager = new Fines(connection);
 
-                try { //show unpaid fines
+                try { // show unpaid fines
                     finesManager.displayFines(false);
                 } catch (SQLException ex) {
                     ex.printStackTrace();
@@ -191,7 +179,7 @@ public class HomePage extends JFrame {
         gbc_btnFines.gridx = 4;
         gbc_btnFines.gridy = 0;
         gbc_btnFines.weightx = 0.5;
-        //gbc_btnFines.gridwidth = 2;
+        // gbc_btnFines.gridwidth = 2;
         homePagePanel.add(fines, gbc_btnFines);
 
         // JLabel
