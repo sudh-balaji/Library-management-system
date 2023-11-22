@@ -13,16 +13,6 @@ import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import java.awt.*;
-import java.sql.*;
-import java.util.Calendar;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 public class Fines extends JFrame {
     private Connection connection;
     public Fines(Connection connection) {
@@ -213,21 +203,64 @@ public class Fines extends JFrame {
 
         homePagePanel.add(new JScrollPane(searchResultsArea), BorderLayout.CENTER);
 
+        JButton payFineButton = new JButton("Pay Fine");
+        JButton updateFinesButton = new JButton("Update Current Fines");
+        JButton displayAllFinesButton = new JButton("Filtering");
+
+        // Search Button ActionListener
+        searchButton.addActionListener(e -> {
+            String searchText = searchField.getText();
+            String searchQuery = "SELECT B.Card_id, B.Bname, SUM(F.fine_amt) AS Total_Fine_Amount " +
+                    "FROM BORROWER B " +
+                    "LEFT JOIN BOOK_LOANS BL ON B.Card_id = BL.Card_id " +
+                    "LEFT JOIN FINES F ON BL.Loan_id = F.Loan_id " +
+                    "WHERE B.Card_id = '" + searchText + "'" +
+                    "GROUP BY B.Card_id";
+
+            try (Statement statement = connection.createStatement()) {
+                ResultSet searchResult = statement.executeQuery(searchQuery);
+                boolean found = false;
+
+                while (searchResult.next()) {
+                    found = true;
+                    int cardId = searchResult.getInt("Card_id");
+                    String borrowerName = searchResult.getString("Bname");
+                    double totalFineAmount = searchResult.getDouble("Total_Fine_Amount");
+
+                    searchResultsArea.setText("Card ID: " + cardId + ", Borrower Name: " + borrowerName + ", Total Fine Amount: $" + totalFineAmount + "\n");
+
+                    if (totalFineAmount > 0) {
+                        payFineButton.addActionListener(payEvent -> {
+                            try {
+                                payFine(cardId);
+                            } catch (SQLException ex) {
+                                handleException(ex, "Error paying fine");
+                            }
+                        });
+                        searchResultsArea.add(payFineButton);
+                    } else {
+                        searchResultsArea.add(new JLabel("No pending fines."));
+                    }
+                }
+
+                if (!found) {
+                    searchResultsArea.setText("No results found for Card ID: " + searchText);
+                }
+            } catch (SQLException ex) {
+                handleException(ex, "Error executing search query");
+            }
+        });
+
+// Display All Fines Button ActionListener
         JCheckBox filterPaidFinesCheckBox = new JCheckBox("Filter Paid Fines");
-        filterPaidFinesCheckBox.addActionListener(e -> {
+        displayAllFinesButton.addActionListener(e -> {
             boolean showPaidFines = filterPaidFinesCheckBox.isSelected();
             try {
-                displayFines(!showPaidFines); // Pass the opposite of the checkbox value
+                displayFines(showPaidFines); // Show all fines based on the checkbox value
             } catch (SQLException ex) {
                 handleException(ex, "Error displaying fines");
             }
         });
-
-        JButton calculateButton = new JButton("Calculate Fines");
-        JButton payFineButton = new JButton("Pay Fine");
-        JButton displayButton = new JButton("Display Fines");
-        //JButton startUpdatesButton = new JButton("Start Daily Updates");
-        JButton updateFinesButton = new JButton("Update Current Fines");
 
         updateFinesButton.addActionListener(e -> {
             if (isLibraryClosed()) {
@@ -243,35 +276,12 @@ public class Fines extends JFrame {
         });
 
         JPanel buttonPanel = new JPanel(new GridLayout(1, 4));
-        buttonPanel.add(calculateButton);
-        buttonPanel.add(payFineButton);
-        buttonPanel.add(displayButton);
-       // buttonPanel.add(startUpdatesButton);
+        buttonPanel.add(searchButton);
         buttonPanel.add(updateFinesButton);
 
         homePagePanel.add(buttonPanel, BorderLayout.SOUTH);
 
-        calculateButton.addActionListener(e -> {
-            calculateAndSetFines();
-        });
 
-        payFineButton.addActionListener(e -> {
-            try {
-                payFine(123); // Placeholder loan ID
-            } catch (SQLException ex) {
-                handleException(ex, "Error paying fine");
-            }
-        });
-        displayButton.addActionListener(e -> {
-            try {
-                displayFines(false); // Placeholder parameter
-            } catch (SQLException ex) {
-                handleException(ex, "Error displaying fines");
-            }
-        });
-        /*startUpdatesButton.addActionListener(e -> {
-            startDailyUpdates();
-        });*/
         finesFrame.add(homePagePanel);
         finesFrame.setVisible(true);
     }
@@ -293,12 +303,9 @@ public class Fines extends JFrame {
             finesManager.calculateAndSetFines(); //get the calculates fines
             finesManager.displayFines(false); //display the fines
 
-            //finesManager.payFine(123); // Example of paying a fine for loan ID 123
-
             connection.close();
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 }
-
