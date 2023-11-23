@@ -142,6 +142,12 @@ public class HomePage extends JFrame {
         newBorrower.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 homePageFrame.setVisible(false);
+                Connection connection = myJDBC.getConnection();
+                try {
+                    BorrowerManagement borrowerManagement = new BorrowerManagement(connection);
+                } catch (SQLException e1){
+                    e1.printStackTrace();
+                }
                 // call your function here
             }
         });
