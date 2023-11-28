@@ -60,17 +60,17 @@ public class CheckOut extends JFrame {
             }
         });
         // Layout setup
-        checkOutPagePanel.setLayout(new BorderLayout());
-        checkOutPagePanel.add(new JScrollPane(searchResultList), BorderLayout.CENTER);
+       // checkOutPagePanel.setLayout(new BorderLayout());
+       // checkOutPagePanel.add(new JScrollPane(searchResultList), BorderLayout.CENTER);
 
-        JPanel bottomPanel = new JPanel();
-        bottomPanel.add(new JLabel("Borrower Card No:"));
-        bottomPanel.add(cardNo);
-        bottomPanel.add(checkoutButton);
+       // JPanel bottomPanel = new JPanel();
+       // bottomPanel.add(new JLabel("Borrower Card No:"));
+       // bottomPanel.add(cardNo);
+        //bottomPanel.add(checkoutButton);
 
-        checkOutPagePanel.add(bottomPanel, BorderLayout.SOUTH);
+        //checkOutPagePanel.add(bottomPanel, BorderLayout.SOUTH);
 
-        add(checkOutPagePanel);
+        //add(checkOutPagePanel);
     }
         
     private void performCheckOut() {
@@ -179,19 +179,19 @@ public class CheckOut extends JFrame {
     
     void buildUserInterface()
     {
-	    // Home Page Frame
+    	// Home Page Frame
 	    homePageFrame = new JFrame("Library Management System");
 	    homePageFrame.setSize(1000, 500);
 	    homePageFrame.setLocation(20, 50);
 	    homePageFrame.setLayout(new GridLayout(2, 1));
 	    homePageFrame.setDefaultCloseOperation(EXIT_ON_CLOSE);
-	
+	   
 	    // Panel for visibility
 	    checkOutPagePanel = new JPanel();
 	    checkOutPagePanel.setBorder(new EmptyBorder(20, 20, 20, 20));
 	    setContentPane(checkOutPagePanel);
 	
-	    // Create Layout: Primary Layout for Check-In page
+	    // Create Layout: Primary Layout for Checkout page
 	    GridBagLayout checkOutPagePanel_layout = new GridBagLayout();
 	    checkOutPagePanel_layout.columnWidths = new int[] { 0, 0 };
 	    checkOutPagePanel_layout.rowHeights = new int[] { 0, 0, 0, 0, 0, 0, 0 };
@@ -255,14 +255,14 @@ public class CheckOut extends JFrame {
         Card_Input_Value.setColumns(15);
 
         // -------------------------------------------------------------------------------------
-        // Check In Button and its functionality
+        // Check Out Button and its functionality
         JButton Check_Out_Button = new JButton("Check Out");
 
         Check_Out_Button.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e)
             {
-                // Validate input fields and handle check-in
+                // Validate input fields and handle checkout
                 if (ISBN_Input_Value.getText().equals("") && 
                     Card_Input_Value.getText().equals("")){
                     JOptionPane.showMessageDialog(null, "Enter a value for ISBN and Card Number");
@@ -271,13 +271,13 @@ public class CheckOut extends JFrame {
             }
        
         });
-        GridBagConstraints Check_In_Button_Constraint = new GridBagConstraints();
-        Check_In_Button_Constraint.fill = GridBagConstraints.HORIZONTAL;
-        Check_In_Button_Constraint.insets = new Insets(0, 0, 5, 0);
-        Check_In_Button_Constraint.gridx = 0;
-        Check_In_Button_Constraint.gridy = 5;
-        Check_In_Button_Constraint.gridwidth = 2;
-        checkOutPagePanel.add(Check_Out_Button, Check_In_Button_Constraint);
+        GridBagConstraints Check_Out_Button_Constraint = new GridBagConstraints();
+        Check_Out_Button_Constraint.fill = GridBagConstraints.HORIZONTAL;
+        Check_Out_Button_Constraint.insets = new Insets(0, 0, 5, 0);
+        Check_Out_Button_Constraint.gridx = 0;
+        Check_Out_Button_Constraint.gridy = 5;
+        Check_Out_Button_Constraint.gridwidth = 2;
+        checkOutPagePanel.add(Check_Out_Button, Check_Out_Button_Constraint);
 
         JLabel additional_space = new JLabel("  ", JLabel.CENTER);
 
@@ -297,6 +297,7 @@ public class CheckOut extends JFrame {
             {
                 // Close the current frame and return to the home page
                 homePageFrame.setVisible(false);
+                dispose();
                 new HomePage();
             }
         });
@@ -310,11 +311,10 @@ public class CheckOut extends JFrame {
         checkOutPagePanel.add(close, Home_Page_Return_Button_Constraint);
 
         // Set up the layout and make the frame visible
-        homePageFrame.add(checkOutPagePanel);
-        homePageFrame.setVisible(true);
+        //homePageFrame.add(checkOutPagePanel);
+        //homePageFrame.setVisible(true);
     }
     
 }
     
     
-
