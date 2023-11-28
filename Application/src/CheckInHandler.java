@@ -4,8 +4,6 @@
  * It allows users to input information such as ISBN, Card No., and Borrower Name to perform check-in operations.
  * The class utilizes Swing components for GUI and interacts with a database to process check-in results.
  * 
- * @createdBy: Alper Duru
- * @createdDate: 11/21/2023
  */
 import java.awt.*;
 import java.awt.event.*;
@@ -155,6 +153,7 @@ public class CheckInHandler extends JFrame
                                                   Borrower_Input_Value.getText());
                     } catch (SQLException e1)
                     {
+                        JOptionPane.showMessageDialog(null, "Error performing check-in: " + e1.getMessage());
                         e1.printStackTrace();
                     }
                 }
