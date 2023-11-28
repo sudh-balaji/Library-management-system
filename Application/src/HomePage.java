@@ -125,11 +125,18 @@ public class HomePage extends JFrame {
         // Check In
         // --------------------------------------------------------------------
         JButton checkIn = new JButton("Check In");
-        checkIn.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
+        checkIn.addActionListener(new ActionListener() checkIn.addActionListener(new ActionListener()
+        {
+            public void actionPerformed(ActionEvent e)
+            {
                 homePageFrame.setVisible(false);
-                // call your function here
-                new CheckInHandler();
+                Connection connection = myJDBC.getConnection(); // Get the connection from MyJDBC
+                try {
+                    CheckInHandler checkInHandler = new CheckInHandler();
+                    checkInHandler.setVisible(true);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
             }
         });
 
