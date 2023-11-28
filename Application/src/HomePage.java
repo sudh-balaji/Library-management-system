@@ -103,7 +103,13 @@ public class HomePage extends JFrame {
         checkOut.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 homePageFrame.setVisible(false);
-                // call your function here
+                Connection connection = myJDBC.getConnection(); // Get the connection from MyJDBC
+                try {
+                	CheckOut checkOut = new CheckOut(connection);
+                	checkOut.setVisible(true);            	
+                } catch (SQLException ex){
+                	ex.printStackTrace(); // Handle SQL exception
+                }
             }
         });
 
