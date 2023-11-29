@@ -117,7 +117,14 @@ public class BorrowerManagement extends JFrame {
                 String name = nameField.getText();
                 String address = addressField.getText();
                 String phone = phoneField.getText();
-
+                if (ssn.length() != 9) {
+                    JOptionPane.showMessageDialog(homePageFrame, "SSN should be 9 digits");
+                    return;
+                }
+                if (phone.length() != 10) {
+                    JOptionPane.showMessageDialog(homePageFrame, "phone number should be 10 digits");
+                    return;
+                }
                 try {
                     int newCardID = generateNewCardId();
                     PreparedStatement pstmt = connection.prepareStatement(
