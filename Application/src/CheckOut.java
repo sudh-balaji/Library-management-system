@@ -7,7 +7,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 public class CheckOut extends JFrame {
-	JFrame homePageFrame;
+    JFrame homePageFrame;
     JPanel checkOutPagePanel;
     JList<String> searchResultList;
     JButton checkoutButton;
