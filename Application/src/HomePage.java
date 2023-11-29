@@ -125,7 +125,7 @@ public class HomePage extends JFrame {
         // Check In
         // --------------------------------------------------------------------
         JButton checkIn = new JButton("Check In");
-        checkIn.addActionListener(new ActionListener() checkIn.addActionListener(new ActionListener()
+        checkIn.addActionListener(new ActionListener()
         {
             public void actionPerformed(ActionEvent e)
             {
