@@ -61,6 +61,4 @@ Password VARCHAR(30),
 UNIQUE(Empid),
 UNIQUE(Password));
 
-SOURCE /InsertAuthors.sql
-SOURCE /InsertBooks.sql
-SOURCE /InsertBookAuthors.sql
+
