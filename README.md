@@ -15,8 +15,8 @@ How to set up Database:
     SOURCE (yourpath)/InsertAuthors.sql
     SOURCE (yourpath)/InsertBooks.sql
     SOURCE (yourpath)/InsertBookAuthors.sql
-    LOAD DATA LOCAL INFILE '/Users/(yourpath)/Downloads/author_table.csv' INTO TABLE AUTHORS FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n'(Name, Author_id);
-    LOAD DATA LOCAL INFILE '/Users/(yourpath)/Downloads/author_table.csv' INTO TABLE BORROWER FIELDS TERMINATED BY ',' LINES TERMINATED BY                 '\n'(Card_id,ssn,Bname,Address,Phone);'
+    LOAD DATA LOCAL INFILE '/Users/(yourpath)/author_table.csv' INTO TABLE AUTHORS FIELDS TERMINATED BY ',' LINES TERMINATED BY '\n'(Name, Author_id);
+    LOAD DATA LOCAL INFILE '/Users/(yourpath)/borrowers.csv' INTO TABLE BORROWER FIELDS TERMINATED BY ',' LINES TERMINATED BY                 '\n'(Card_id,ssn,Bname,Address,Phone);'
 Once all sources are loaded to the terminal make sure to check the files. (ex. 'SELECT * FROM BORROWER;')
 
 4. Now that we have all sources we need to connect our database to our IDE with JDBC Connection. You need to download the latest jar file:(https://dev.mysql.com/downloads/connector/j/)
