@@ -7,7 +7,7 @@ import javax.swing.*;
 import javax.swing.border.*;
 
 public class CheckOut extends JFrame {
-    JFrame homePageFrame;
+	JFrame homePageFrame;
     JPanel checkOutPagePanel;
     JList<String> searchResultList;
     JButton checkoutButton;
@@ -26,7 +26,7 @@ public class CheckOut extends JFrame {
         this.homePage = homePage;
         setTitle("Check Out");
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        initComponents();
+        components();
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
@@ -46,7 +46,7 @@ public class CheckOut extends JFrame {
     } 
     */
     
-    private void initComponents() {
+    private void components() {
         checkOutPagePanel = new JPanel();
         searchResultList = new JList<>();
         checkoutButton = new JButton("Check Out");
@@ -316,5 +316,6 @@ public class CheckOut extends JFrame {
     }
     
 }
+    
     
     
