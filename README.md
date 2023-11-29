@@ -7,7 +7,7 @@ After successfully completing the above steps, change the parameters “host”,
 Language: Java
 Framework: Spring
 Platform: Java Platform, Standard Edition (Java SE)
-Software Version: Java JDK 15
+Software Version: Java JDK 19
 
 How to set up Database: 
 1. Get the library.sql file into your terminal, then verify by opening datbase and then using this command 'SHOW TABLE;'
@@ -20,7 +20,11 @@ How to set up Database:
 Once all sources are loaded to the terminal make sure to check the files. (ex. 'SELECT * FROM BORROWER;')
 
 4. Now that we have all sources we need to connect our database to our IDE with JDBC Connection. You need to download the latest jar file:(https://dev.mysql.com/downloads/connector/j/)
-Once that is downloaded you need to add the file to your IDE which depends what you use. (ex. I used intellji and added the jar file to my 
+Once that is downloaded you need to add the file to your IDE which depends what you use. (ex. I used intellji and added the jar file to my a directory i created under Project Stuctures --> Modules --> Dependencies. Then from there I created a MyJDBC class that called the connections and connected the IDE to my database.
+
+
+
+
    
 
 
