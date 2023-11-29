@@ -1,4 +1,4 @@
-# 4347_group_project
+# Team O 4347.002 Project
 
 Describes how to compile, build, and install your application:
 
