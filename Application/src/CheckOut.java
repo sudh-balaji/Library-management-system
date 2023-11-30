@@ -17,7 +17,7 @@ public class CheckOut extends JFrame {
 
     /**
      * Constructor for CheckOut class.
-     *
+     * @Created by: Nidhi
      * @throws SQLException if a database access error occurs
      */
     public CheckOut(Connection connection) throws SQLException {
