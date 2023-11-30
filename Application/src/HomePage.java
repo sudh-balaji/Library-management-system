@@ -3,7 +3,6 @@
  * It includes functionalities such as searching for a book, checking in and out, managing borrowers, and handling fines.
  * The class uses Java Swing for creating a graphical user interface.
  *
- * @createdBy: Alper Duru
  * @createdDate: 11/11/2023
  */
 
@@ -132,7 +131,7 @@ public class HomePage extends JFrame {
                 homePageFrame.setVisible(false);
                 Connection connection = myJDBC.getConnection(); // Get the connection from MyJDBC
                 try {
-                    CheckInHandler checkInHandler = new CheckInHandler();
+                    CheckIn checkInHandler = new CheckIn(connection);
                     checkInHandler.setVisible(true);
                 } catch (Exception ex) {
                     ex.printStackTrace();
