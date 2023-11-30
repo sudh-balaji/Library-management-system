@@ -19,7 +19,7 @@ public class BorrowerManagement extends JFrame {
             public void run() {
                 try {
                     Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/library",
-                            "root", "AddUrPassword"); // add your password
+                            "root", "placeholder");
                     new BookSearch(connection);
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -117,6 +117,11 @@ public class BorrowerManagement extends JFrame {
                 String name = nameField.getText();
                 String address = addressField.getText();
                 String phone = phoneField.getText();
+                if (ssn == null || ssn.isEmpty() || name == null || name.isEmpty() || address == null || address.isEmpty() || phone == null || phone.isEmpty()) {
+                    JOptionPane.showMessageDialog(homePageFrame, "Please fill out all fields");
+                    return;
+                }
+
                 if (ssn.length() != 9) {
                     JOptionPane.showMessageDialog(homePageFrame, "SSN should be 9 digits");
                     return;
@@ -138,7 +143,7 @@ public class BorrowerManagement extends JFrame {
                     pstmt.executeUpdate();
                     pstmt.close();
 
-                    JOptionPane.showMessageDialog(homePageFrame, "Borrower added successfully!");
+                    JOptionPane.showMessageDialog(homePageFrame, "Borrower added successfully! Card ID: " + newCardID);
                 } catch (SQLException ex) {
                     ex.printStackTrace();
                     JOptionPane.showMessageDialog(homePageFrame, "Error adding borrower!");
