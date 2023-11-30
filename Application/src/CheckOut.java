@@ -53,12 +53,12 @@ public class CheckOut extends JFrame {
         cardNo = new JTextField(20);
 
         // Add action listener to the checkoutButton
-        checkoutButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                performCheckOut();
-            }
-        });
+        //checkoutButton.addActionListener(new ActionListener() {
+       //     @Override
+        //    public void actionPerformed(ActionEvent e) {
+         //       performCheckOut();
+        //    }
+       // });
         // Layout setup
        // checkOutPagePanel.setLayout(new BorderLayout());
        // checkOutPagePanel.add(new JScrollPane(searchResultList), BorderLayout.CENTER);
@@ -73,12 +73,12 @@ public class CheckOut extends JFrame {
         //add(checkOutPagePanel);
     }
         
-    private void performCheckOut() {
-        String[] selectedBooks = searchResultList.getSelectedValuesList().toArray(new String[0]);
-        String cardNumber = cardNo.getText().trim();
+     void performCheckOut(String book, String cardNumber) {
+        //String[] selectedBooks = searchResultList.getSelectedValuesList().toArray(new String[0]);
+        //String cardNumber = cardNo.getText().trim();
 
         // Validate input 
-        if (selectedBooks.length == 0 || cardNumber.isEmpty()) {
+        if (book.isEmpty() || cardNumber.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please select books and enter borrower card number.", "Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -90,20 +90,20 @@ public class CheckOut extends JFrame {
         }
 
         // Perform checkout for each selected book
-        for (String bookId : selectedBooks) {
-        	boolean checkoutSuccess = checkOutBook(bookId, cardNumber);
+        //for (String bookId : selectedBooks) {
+        	boolean checkoutSuccess = checkOutBook(book, cardNumber);
 
             if (checkoutSuccess) {
                 JOptionPane.showMessageDialog(this, "Checkout successful.", "Success", JOptionPane.INFORMATION_MESSAGE);
             } else {
                 JOptionPane.showMessageDialog(this, "Checkout failed. Please check the inputs.", "Error", JOptionPane.ERROR_MESSAGE);
             }
-        }
+        //}
     }
     
     private boolean validateActiveBookLoans(String cardNo) {
         // Check the number of active book loans for the borrower
-        String countQuery = "SELECT COUNT(*) FROM BOOK_LOANS WHERE CardNo = ? AND DateIn IS NULL";
+        String countQuery = "SELECT COUNT(*) FROM BOOK_LOANS WHERE Card_Id = ? AND Date_In IS NULL";
 
         try (PreparedStatement countStatement = connection.prepareStatement(countQuery)) {
             countStatement.setString(1, cardNo);
@@ -128,15 +128,15 @@ public class CheckOut extends JFrame {
         }
         
     	// Do the checkout
-    	String insertQuery = "INSERT INTO BOOK_LOANS (BookId, CardNo, DateOut, DueDate) VALUES (?, ?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 14 DAY))";
+    	String insertQuery = "INSERT INTO BOOK_LOANS (Isbn, Card_id, Date_out, Due_date) VALUES (?, ?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 14 DAY))";
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(insertQuery)) {
             preparedStatement.setString(1, bookId);
             preparedStatement.setString(2, cardNo);
 
-            int rowsAffected = preparedStatement.executeUpdate();
+            preparedStatement.executeUpdate();
 
-            return rowsAffected > 0;
+            return true;
         } catch (SQLException e) {
             e.printStackTrace(); // Handle SQL exception 
             return false;
@@ -145,7 +145,7 @@ public class CheckOut extends JFrame {
     
     private boolean isBookCheckedOut(String bookId) {
         // Check if the book is already checked out
-        String checkQuery = "SELECT COUNT(*) FROM BOOK_LOANS WHERE BookId = ? AND DateIn IS NULL";
+        String checkQuery = "SELECT COUNT(*) FROM BOOK_LOANS WHERE Isbn = ? AND Date_In IS NULL";
 
         try (PreparedStatement checkStatement = connection.prepareStatement(checkQuery)) {
             checkStatement.setString(1, bookId);
@@ -168,8 +168,10 @@ public class CheckOut extends JFrame {
             public void run() {
                 try {
                     Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/library",
-                            "root", "AddUrPassWord"); // add your password here
-                    new CheckOut(connection);
+                            "root", "AddUrPassword"); // add your password here
+                    CheckOut bookOut = new CheckOut(connection);
+                    //bookOut.performCheckOut();
+                    //connection.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
@@ -262,10 +264,14 @@ public class CheckOut extends JFrame {
         {
             public void actionPerformed(ActionEvent e)
             {
+            	String isbn = ISBN_Input_Value.getText();
+            	String cardNo = Card_Input_Value.getText();
                 // Validate input fields and handle checkout
                 if (ISBN_Input_Value.getText().equals("") && 
                     Card_Input_Value.getText().equals("")){
                     JOptionPane.showMessageDialog(null, "Enter a value for ISBN and Card Number");
+                } else {
+                	performCheckOut(isbn, cardNo);
                 }
                
             }
@@ -287,6 +293,10 @@ public class CheckOut extends JFrame {
         additional_space_constraint.gridy = 6;
         additional_space_constraint.gridwidth = 2;
         checkOutPagePanel.add(additional_space, additional_space_constraint);
+        
+       // Check_Out_Button.addActionListener(e -> {
+        //    performCheckOut();
+       // });
 
         // -------------------------------------------------------------------------------------
         // Close Button
@@ -318,4 +328,5 @@ public class CheckOut extends JFrame {
 }
     
     
+
     
