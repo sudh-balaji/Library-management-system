@@ -1,9 +1,9 @@
 # Team O's 4347.002 Project
 
-# Language: Java
-# Framework: Spring
-# Platform: Java Platform, Standard Edition (Java SE)
-# Software Version: Java JDK 19
+### Language: Java
+### Framework: Spring
+### Platform: Java Platform, Standard Edition (Java SE)
+### Software Version: Java JDK 19
 
 # How to set up Database: 
 ### 1. Get the library.sql file into your terminal, then verify by opening datbase and then using this command 'SHOW TABLE;'
