@@ -19,7 +19,7 @@ public class BorrowerManagement extends JFrame {
             public void run() {
                 try {
                     Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/library",
-                            "root", "placeholder");
+                            "root", "AddUrPassword"); // add your password
                     new BookSearch(connection);
                 } catch (SQLException e) {
                     e.printStackTrace();
