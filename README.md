@@ -16,8 +16,10 @@
 ### Once all sources are loaded to the terminal make sure to check the files. (ex. 'SELECT * FROM BORROWER;')
 
 ### 4. Now that we have all sources we need to connect our database to our IDE with JDBC Connection. You need to download the latest jar file:(https://dev.mysql.com/downloads/connector/j/)
-### Once that is downloaded you need to add the file to your IDE which depends what you use. (ex. I used intellji and added the jar file to my a directory I created under:
+### Once that is downloaded you need to add the file to your IDE which depends what you use. (ex. In IntelliJ, add the jar file to a created directory by doing:
 Project Stuctures --> Modules --> Dependencies. 
+### In Eclipse, add the jar file to the project by doing:
+Configure Build Path --> Libraries --> Add External JARs
 ### Then from there use the MyJDBC class that calls the connections and connects the IDE to your database. Once it is connected you should be able to run the full program with all classes along with the application. 
 
 
