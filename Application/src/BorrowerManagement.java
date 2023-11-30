@@ -146,7 +146,7 @@ public class BorrowerManagement extends JFrame {
                     JOptionPane.showMessageDialog(homePageFrame, "Borrower added successfully! Card ID: " + newCardID);
                 } catch (SQLException ex) {
                     ex.printStackTrace();
-                    JOptionPane.showMessageDialog(homePageFrame, "Error adding borrower!");
+                    JOptionPane.showMessageDialog(homePageFrame, "Borrower already exists!");
                 }
             }
         });
