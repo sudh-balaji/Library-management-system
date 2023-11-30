@@ -1,17 +1,17 @@
 /**
- * The Fines class calculates the fines based on certain schedules
+ * The Fines class
  * @createdBy: Aileen Mata
  * @createdDate: 11/16/23
  */
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.*;
 import java.util.Calendar;
-import java.util.concurrent.Executors;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Fines extends JFrame {
     private Connection connection;
@@ -20,60 +20,56 @@ public class Fines extends JFrame {
         buildUserInterface();
 
     }
-    public void calculateAndSetFines() { //Method to calculate fines for late books
-        if (isLibraryClosed()) {
-            try {
-                PreparedStatement checkExistingFines = connection.prepareStatement(
-                        "SELECT Loan_id, fine_amt, paid FROM FINES WHERE Loan_id = ?"
-                );
-                PreparedStatement updateFine = connection.prepareStatement(
-                        "UPDATE FINES SET fine_amt = ? WHERE Loan_id = ?"
-                );
-                PreparedStatement insertNewFine = connection.prepareStatement(
-                        "INSERT INTO FINES (Loan_id, fine_amt) VALUES (?, ?)"
-                );
+    public void calculateAndSetFines() {
+        try {
+            PreparedStatement checkExistingFines = connection.prepareStatement(
+                    "SELECT Loan_id, fine_amt, paid FROM FINES WHERE Loan_id = ?"
+            );
+            PreparedStatement updateFine = connection.prepareStatement(
+                    "UPDATE FINES SET fine_amt = ? WHERE Loan_id = ?"
+            );
+            PreparedStatement insertNewFine = connection.prepareStatement(
+                    "INSERT INTO FINES (Loan_id, fine_amt) VALUES (?, ?)"
+            );
 
-                String selectBookLoansQuery = "SELECT Loan_id, Date_in, Due_date FROM BOOK_LOANS";
+            String selectBookLoansQuery = "SELECT Loan_id, Date_in, Due_date FROM BOOK_LOANS";
 
-                Statement statement = connection.createStatement();
-                ResultSet bookLoans = statement.executeQuery(selectBookLoansQuery);
+            Statement statement = connection.createStatement();
+            ResultSet bookLoans = statement.executeQuery(selectBookLoansQuery);
 
-                while (bookLoans.next()) {
-                    int loanId = bookLoans.getInt("Loan_id");
-                    Date dateIn = bookLoans.getDate("Date_in");
-                    Date dueDate = bookLoans.getDate("Due_date");
+            while (bookLoans.next()) {
+                int loanId = bookLoans.getInt("Loan_id");
+                Date dateIn = bookLoans.getDate("Date_in");
+                Date dueDate = bookLoans.getDate("Due_date");
 
-                    checkExistingFines.setInt(1, loanId);
-                    ResultSet existingFines = checkExistingFines.executeQuery();
+                checkExistingFines.setInt(1, loanId);
+                ResultSet existingFines = checkExistingFines.executeQuery();
 
-                    if (existingFines.next()) {
-                        double currentFine = existingFines.getDouble("fine_amt");
-                        boolean isPaid = existingFines.getBoolean("paid");
+                if (existingFines.next()) {
+                    double currentFine = existingFines.getDouble("fine_amt");
+                    boolean isPaid = existingFines.getBoolean("paid");
 
-                        if (!isPaid) {
-                            double newFine = calculateFine(dateIn, dueDate);
-                            if (newFine != currentFine) {
-                                updateFine.setDouble(1, newFine);
-                                updateFine.setInt(2, loanId);
-                                updateFine.executeUpdate();
-                            }
-                        }
-                    } else {
+                    if (!isPaid) {
                         double newFine = calculateFine(dateIn, dueDate);
-                        insertNewFine.setInt(1, loanId);
-                        insertNewFine.setDouble(2, newFine);
-                        insertNewFine.executeUpdate();
+                        if (newFine != currentFine) {
+                            updateFine.setDouble(1, newFine);
+                            updateFine.setInt(2, loanId);
+                            updateFine.executeUpdate();
+                        }
                     }
+                } else {
+                    double newFine = calculateFine(dateIn, dueDate);
+                    insertNewFine.setInt(1, loanId);
+                    insertNewFine.setDouble(2, newFine);
+                    insertNewFine.executeUpdate();
                 }
-
-                displayFines(false); // Display updated fines
-            } catch (SQLException e) {
-                e.printStackTrace();
             }
-        } else {
-            JOptionPane.showMessageDialog(null, "Library is open. Fines cannot be updated.");
+            displayFines(false); // Display updated fines
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
+
     private double calculateFine(Date dateIn, Date dueDate) {
         if (dateIn != null) {
             // Calculate fine for a book that has been returned
@@ -101,7 +97,7 @@ public class Fines extends JFrame {
             if (dateIn != null) {
                 // Book has been returned, allow fine payment
                 try (Statement statement = connection.createStatement()) {
-                    String payFineQuery = "UPDATE FINES SET paid = TRUE WHERE Loan_id = " + loanId;
+                    String payFineQuery = "UPDATE FINES SET paid = TRUE WHERE Loan_id = " + loanId + " AND fine_amt > 0"; // Ensuring fine_amt is greater than 0
                     statement.executeUpdate(payFineQuery);
                 }
             } else {
@@ -111,6 +107,7 @@ public class Fines extends JFrame {
             JOptionPane.showMessageDialog(null, "Loan ID not found.");
         }
     }
+
     public String createDisplayFinesQuery(String filterCondition) { //Method to create SQL query for displaying fines
 
         // Gets the SQL data from BORROWER, BOOK_LOANS, and FINES
@@ -128,56 +125,25 @@ public class Fines extends JFrame {
             String displayFinesQuery = createDisplayFinesQuery(filterCondition);
 
             ResultSet resultSet = statement.executeQuery(displayFinesQuery);
+            Map<Integer, Double> finesPerBorrower = new HashMap<>(); // Map to store total fines per borrower
+
             while (resultSet.next()) {
                 int cardId = resultSet.getInt("Card_id");
-                String borrowerName = resultSet.getString("Bname");
                 double totalFineAmount = resultSet.getDouble("Total_Fine_Amount");
 
-                System.out.println("Card ID: " + cardId + ", Borrower Name: " + borrowerName + ", Total Fine Amount: $" + totalFineAmount);
+                if (!finesPerBorrower.containsKey(cardId)) {
+                    finesPerBorrower.put(cardId, totalFineAmount);
+                } else {
+                    finesPerBorrower.put(cardId, finesPerBorrower.get(cardId) + totalFineAmount);
+                }
+            }
+            for (Map.Entry<Integer, Double> entry : finesPerBorrower.entrySet()) {
+                int cardId = entry.getKey();
+                double totalFineAmount = entry.getValue();
+
+                System.out.println("Card ID: " + cardId + ", Total Fine Amount: $" + totalFineAmount);
             }
         }
-    }
-    public void startDailyUpdates() {  //Scheduling daily updates for fine calculations
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-        // Sets a schedule time to recalculate and update the fines
-        try {
-            scheduler.scheduleAtFixedRate(() -> {
-                try {
-                    calculateAndSetFines();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }, calculatesFinesDelay(), 24, TimeUnit.HOURS);
-        } catch (RejectedExecutionException ex) {
-            ex.printStackTrace();
-        }
-    }
-    private long calculatesFinesDelay() { //calculates fines based on library closed hours (9am-5pm)
-        Calendar calendar = Calendar.getInstance();
-        long now = calendar.getTimeInMillis();
-        //this ensures that the schedule runs after it closes and not charge during open hours.
-        calendar.set(Calendar.HOUR_OF_DAY, 17);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        long libraryClose = calendar.getTimeInMillis();
-
-        calendar.set(Calendar.HOUR_OF_DAY, 9);
-        long libraryOpen = calendar.getTimeInMillis();
-
-        if (now >= libraryClose) {
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
-            return libraryOpen - now;
-        } else if (now < libraryOpen) {
-            return libraryOpen - now;
-        } else {
-            return libraryClose - now;
-        }
-    }
-    private boolean isLibraryClosed() {  //Check if the library is closed
-
-        Calendar calendar = Calendar.getInstance();
-        int hour = calendar.get(Calendar.HOUR_OF_DAY);
-        return hour < 9 || hour >= 17; // Library closed from 9 am to 5 pm (24-hour format)
     }
     private void buildUserInterface() {
         JFrame finesFrame = new JFrame("Fines");
@@ -203,9 +169,13 @@ public class Fines extends JFrame {
 
         homePagePanel.add(new JScrollPane(searchResultsArea), BorderLayout.CENTER);
 
+        //JButton calculateButton = new JButton("Calculate Fines");
         JButton payFineButton = new JButton("Pay Fine");
-        JButton updateFinesButton = new JButton("Update Current Fines");
-        JButton displayAllFinesButton = new JButton("Filtering");
+       // JButton displayButton = new JButton("Display Fines");
+        JButton updateFinesButton = new JButton("Update All Current Fines");
+        JButton displayAllFinesButton = new JButton("Display All Fines");
+        //JButton startUpdatesButton = new JButton("Start Daily Updates");
+
 
         // Search Button ActionListener
         searchButton.addActionListener(e -> {
@@ -253,6 +223,7 @@ public class Fines extends JFrame {
 
 // Display All Fines Button ActionListener
         JCheckBox filterPaidFinesCheckBox = new JCheckBox("Filter Paid Fines");
+        // Display All Fines Button ActionListener
         displayAllFinesButton.addActionListener(e -> {
             boolean showPaidFines = filterPaidFinesCheckBox.isSelected();
             try {
@@ -263,24 +234,29 @@ public class Fines extends JFrame {
         });
 
         updateFinesButton.addActionListener(e -> {
-            if (isLibraryClosed()) {
-                try {
-                    calculateAndSetFines();
-                    displayFines(false); // Display updated fines
-                } catch (SQLException ex) {
-                    handleException(ex, "Error updating fines");
-                }
-            } else {
-                JOptionPane.showMessageDialog(null, "Library is open. Fines cannot be updated.");
+            try {
+                calculateAndSetFines(); // Trigger fines update immediately upon button click
+                displayFines(false); // Display updated fines
+            } catch (SQLException ex) {
+                handleException(ex, "Error updating fines");
+            }
+        });
+
+        // Go Back Button
+        JButton backButton = new JButton("Back");
+        backButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                homePagePanel.setVisible(false);
+                new HomePage();
             }
         });
 
         JPanel buttonPanel = new JPanel(new GridLayout(1, 4));
         buttonPanel.add(searchButton);
         buttonPanel.add(updateFinesButton);
+        buttonPanel.add(backButton);
 
         homePagePanel.add(buttonPanel, BorderLayout.SOUTH);
-
 
         finesFrame.add(homePagePanel);
         finesFrame.setVisible(true);
