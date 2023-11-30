@@ -271,7 +271,7 @@ public class Fines extends JFrame {
         try {
             String url = "jdbc:mysql://localhost:3306/library";
             String user = "root";
-            String password = "Narutoget05?"; //add your password here
+            String password = "ADDURPASS"; //add your password here
 
             Connection connection = DriverManager.getConnection(url, user, password);
             Fines finesManager = new Fines(connection);
