@@ -22,6 +22,8 @@ Project Stuctures --> Modules --> Dependencies.
 Configure Build Path --> Libraries --> Add External JARs
 ### Then from there use the MyJDBC class that calls the connections and connects the IDE to your database. Once it is connected you should be able to run the full program with all classes along with the application. 
 
+### In addition to the jar file, you will use the java.sql, java.util, java.awt, and javax.swing libraries. In Eclipse, you may need to modify your module-info to include java.desktop to use javax.swing.
+
 
 
 
