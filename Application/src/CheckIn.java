@@ -1,4 +1,3 @@
-
 import java.awt.*;
 import java.awt.event.*;
 import java.sql.*;
@@ -53,7 +52,7 @@ public class CheckIn extends JFrame {
     private ArrayList<String> searchBookLoans(String isbn, String card) throws SQLException {
         ArrayList<String> bookLoans = new ArrayList<>();
         String query = "SELECT Loan_id, Isbn, Card_id FROM BOOK_LOANS " +
-                "WHERE Isbn LIKE ? AND Card_id LIKE ?";
+                "WHERE Isbn LIKE ? AND Card_id LIKE ? AND Date_in is NULL"; // Exclude checked-in loans
 
         try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
             preparedStatement.setString(1, "%" + isbn + "%");
@@ -254,6 +253,7 @@ public class CheckIn extends JFrame {
             {
                 // Close the current frame and return to the home page
                 checkInFrame.setVisible(false);
+                dispose();
                 new HomePage();
             }
         });
@@ -272,4 +272,3 @@ public class CheckIn extends JFrame {
         //checkInFrame.setVisible(true);
     }
 }
-
