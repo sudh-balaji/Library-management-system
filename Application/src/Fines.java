@@ -23,14 +23,15 @@ public class Fines extends JFrame {
     public void calculateAndSetFines() {
         try {
             PreparedStatement checkExistingFines = connection.prepareStatement(
-                    "SELECT Loan_id, fine_amt, paid FROM FINES WHERE Loan_id = ?"
+                    "SELECT Loan_id, Fine_amt, paid FROM FINES WHERE Loan_id = ?"
             );
             PreparedStatement updateFine = connection.prepareStatement(
-                    "UPDATE FINES SET fine_amt = ? WHERE Loan_id = ?"
+                    "UPDATE FINES SET Fine_amt = ? WHERE Loan_id = ?"
             );
             PreparedStatement insertNewFine = connection.prepareStatement(
-                    "INSERT INTO FINES (Loan_id, fine_amt) VALUES (?, ?)"
+                    "INSERT INTO FINES (Loan_id, Fine_amt) VALUES (?, ?)"
             );
+
 
             String selectBookLoansQuery = "SELECT Loan_id, Date_in, Due_date FROM BOOK_LOANS";
 
@@ -46,7 +47,7 @@ public class Fines extends JFrame {
                 ResultSet existingFines = checkExistingFines.executeQuery();
 
                 if (existingFines.next()) {
-                    double currentFine = existingFines.getDouble("fine_amt");
+                    double currentFine = existingFines.getDouble("Fine_amt");
                     boolean isPaid = existingFines.getBoolean("paid");
 
                     if (!isPaid) {
@@ -107,16 +108,15 @@ public class Fines extends JFrame {
             JOptionPane.showMessageDialog(null, "Loan ID not found.");
         }
     }
-
     public String createDisplayFinesQuery(String filterCondition) { //Method to create SQL query for displaying fines
 
         // Gets the SQL data from BORROWER, BOOK_LOANS, and FINES
-        return "SELECT B.Card_id, B.Bname, SUM(F.fine_amt) AS Total_Fine_Amount " +
+        return "SELECT B.Card_id, B.Bname, SUM(F.fine_amt) AS Fines_Amt " +
                 "FROM BORROWER B " +
                 "LEFT JOIN BOOK_LOANS BL ON B.Card_id = BL.Card_id " +
                 "LEFT JOIN FINES F ON BL.Loan_id = F.Loan_id " +
                 "WHERE 1=1 " + filterCondition +
-                "GROUP BY B.Card_id HAVING Total_Fine_Amount > 0";
+                "GROUP BY B.Card_id HAVING Fines_Amt > 0";
     }
     //Method to display fines based on filter condition
     public void displayFines(boolean showUnpaidFines) throws SQLException {
@@ -129,7 +129,7 @@ public class Fines extends JFrame {
 
             while (resultSet.next()) {
                 int cardId = resultSet.getInt("Card_id");
-                double totalFineAmount = resultSet.getDouble("Total_Fine_Amount");
+                double totalFineAmount = resultSet.getDouble("Fines_amt");
 
                 if (!finesPerBorrower.containsKey(cardId)) {
                     finesPerBorrower.put(cardId, totalFineAmount);
@@ -171,7 +171,7 @@ public class Fines extends JFrame {
 
         //JButton calculateButton = new JButton("Calculate Fines");
         JButton payFineButton = new JButton("Pay Fine");
-       // JButton displayButton = new JButton("Display Fines");
+        // JButton displayButton = new JButton("Display Fines");
         JButton updateFinesButton = new JButton("Update All Current Fines");
         JButton displayAllFinesButton = new JButton("Display All Fines");
         //JButton startUpdatesButton = new JButton("Start Daily Updates");
@@ -180,7 +180,7 @@ public class Fines extends JFrame {
         // Search Button ActionListener
         searchButton.addActionListener(e -> {
             String searchText = searchField.getText();
-            String searchQuery = "SELECT B.Card_id, B.Bname, SUM(F.fine_amt) AS Total_Fine_Amount " +
+            String searchQuery = "SELECT B.Card_id, B.Bname, IFNULL(SUM(F.Fine_amt), 0) AS Fine_amt " +
                     "FROM BORROWER B " +
                     "LEFT JOIN BOOK_LOANS BL ON B.Card_id = BL.Card_id " +
                     "LEFT JOIN FINES F ON BL.Loan_id = F.Loan_id " +
@@ -195,22 +195,21 @@ public class Fines extends JFrame {
                     found = true;
                     int cardId = searchResult.getInt("Card_id");
                     String borrowerName = searchResult.getString("Bname");
-                    double totalFineAmount = searchResult.getDouble("Total_Fine_Amount");
+                    double totalFineAmount = searchResult.getDouble("Fine_Amt");
 
+                    // Display results in the text area
                     searchResultsArea.setText("Card ID: " + cardId + ", Borrower Name: " + borrowerName + ", Total Fine Amount: $" + totalFineAmount + "\n");
 
-                    if (totalFineAmount > 0) {
-                        payFineButton.addActionListener(payEvent -> {
-                            try {
-                                payFine(cardId);
-                            } catch (SQLException ex) {
-                                handleException(ex, "Error paying fine");
-                            }
-                        });
-                        searchResultsArea.add(payFineButton);
-                    } else {
-                        searchResultsArea.add(new JLabel("No pending fines."));
-                    }
+                    // Adding functionality for paying fines
+                    payFineButton.addActionListener(payEvent -> {
+                        try {
+                            payFine(cardId);
+                            displayFines(false); // Update displayed fines after payment
+                        } catch (SQLException ex) {
+                            handleException(ex, "Error paying fine");
+                        }
+                    });
+                    searchResultsArea.add(payFineButton);
                 }
 
                 if (!found) {
@@ -220,6 +219,7 @@ public class Fines extends JFrame {
                 handleException(ex, "Error executing search query");
             }
         });
+
 
 // Display All Fines Button ActionListener
         JCheckBox filterPaidFinesCheckBox = new JCheckBox("Filter Paid Fines");
@@ -271,7 +271,7 @@ public class Fines extends JFrame {
         try {
             String url = "jdbc:mysql://localhost:3306/library";
             String user = "root";
-            String password = "ADDURPASS"; //add your password here
+            String password = "Narutoget05?"; //add your password here
 
             Connection connection = DriverManager.getConnection(url, user, password);
             Fines finesManager = new Fines(connection);
