@@ -26,6 +26,8 @@ Configure Build Path --> Libraries --> Add External JARs
 
 ### We used MacOS to develop the application but the application should work on all operating systems.
 
+### Once all files are downloaded to a project in your IDE, run the HomePage.java to start the application.
+
 
 
 
