@@ -23,7 +23,7 @@ public class Fines extends JFrame {
     public void calculateAndSetFines() {
         try {
             PreparedStatement checkExistingFines = connection.prepareStatement(
-                    "SELECT Loan_id, Fine_amt, paid FROM FINES WHERE Loan_id = ?"
+                    "SELECT Loan_id, Fine_amt, Paid FROM FINES WHERE Loan_id = ?"
             );
             PreparedStatement updateFine = connection.prepareStatement(
                     "UPDATE FINES SET Fine_amt = ? WHERE Loan_id = ?"
@@ -48,7 +48,7 @@ public class Fines extends JFrame {
 
                 if (existingFines.next()) {
                     double currentFine = existingFines.getDouble("Fine_amt");
-                    boolean isPaid = existingFines.getBoolean("paid");
+                    boolean isPaid = existingFines.getBoolean("Paid");
 
                     if (!isPaid) {
                         double newFine = calculateFine(dateIn, dueDate);
@@ -98,7 +98,7 @@ public class Fines extends JFrame {
             if (dateIn != null) {
                 // Book has been returned, allow fine payment
                 try (Statement statement = connection.createStatement()) {
-                    String payFineQuery = "UPDATE FINES SET paid = TRUE WHERE Loan_id = " + loanId + " AND fine_amt > 0"; // Ensuring fine_amt is greater than 0
+                    String payFineQuery = "UPDATE FINES SET Paid = TRUE WHERE Loan_id = " + loanId + " AND Fine_amt > 0"; // Ensuring fine_amt is greater than 0
                     statement.executeUpdate(payFineQuery);
                 }
             } else {
@@ -108,20 +108,32 @@ public class Fines extends JFrame {
             JOptionPane.showMessageDialog(null, "Loan ID not found.");
         }
     }
-    public String createDisplayFinesQuery(String filterCondition) { //Method to create SQL query for displaying fines
+    /*public String createDisplayFinesQuery(String filterCondition) { //Method to create SQL query for displaying fines
 
         // Gets the SQL data from BORROWER, BOOK_LOANS, and FINES
-        return "SELECT B.Card_id, B.Bname, SUM(F.fine_amt) AS Fines_Amt " +
+        return "SELECT B.Card_id, B.Bname, SUM(F.Fine_amt) AS Fine_Amt " +
                 "FROM BORROWER B " +
                 "LEFT JOIN BOOK_LOANS BL ON B.Card_id = BL.Card_id " +
                 "LEFT JOIN FINES F ON BL.Loan_id = F.Loan_id " +
-                "WHERE 1=1 " + filterCondition +
-                "GROUP BY B.Card_id HAVING Fines_Amt > 0";
+                "WHERE 1=1 " +filterCondition +
+                "GROUP BY B.Card_id HAVING Fine_Amt > 0";
+    }*/
+
+    // SELECT B.Card_id, B.Bname, SUM(F.Fine_amt) AS Fine_Amt FROM BORROWER B LEFT JOIN BOOK_LOANS BL ON B.Card_id = BL.Card_id LEFT JOIN FINES F ON BL.Loan_id = F.Loan_id WHERE 1=1 GROUP BY B.Card_id HAVING Fine_Amt > 0;
+    public String createDisplayFinesQuery(String filterCondition) { //Method to create SQL query for displaying fines
+
+        // Gets the SQL data from BORROWER, BOOK_LOANS, and FINES
+        return "SELECT B.Card_id, B.Bname, SUM(F.Fine_amt) AS Fine_Amt " +
+                "FROM BORROWER B " +
+                "LEFT JOIN BOOK_LOANS BL ON B.Card_id = BL.Card_id " +
+                "LEFT JOIN FINES F ON BL.Loan_id = F.Loan_id " +
+                "WHERE 1=1 " + (filterCondition.isEmpty() ? "" : "AND") + filterCondition + //checks filter is empty
+                "GROUP BY B.Card_id HAVING Fine_Amt > 0";
     }
     //Method to display fines based on filter condition
     public void displayFines(boolean showUnpaidFines) throws SQLException {
         try (Statement statement = connection.createStatement()) {
-            String filterCondition = showUnpaidFines ? "AND F.paid = FALSE " : "";
+            String filterCondition = showUnpaidFines ? "AND F.Paid = FALSE " : "";
             String displayFinesQuery = createDisplayFinesQuery(filterCondition);
 
             ResultSet resultSet = statement.executeQuery(displayFinesQuery);
@@ -129,7 +141,7 @@ public class Fines extends JFrame {
 
             while (resultSet.next()) {
                 int cardId = resultSet.getInt("Card_id");
-                double totalFineAmount = resultSet.getDouble("Fines_amt");
+                double totalFineAmount = resultSet.getDouble("Fine_amt");
 
                 if (!finesPerBorrower.containsKey(cardId)) {
                     finesPerBorrower.put(cardId, totalFineAmount);
@@ -176,11 +188,10 @@ public class Fines extends JFrame {
         JButton displayAllFinesButton = new JButton("Display All Fines");
         //JButton startUpdatesButton = new JButton("Start Daily Updates");
 
-
         // Search Button ActionListener
-        searchButton.addActionListener(e -> {
+        /*searchButton.addActionListener(e -> {
             String searchText = searchField.getText();
-            String searchQuery = "SELECT B.Card_id, B.Bname, IFNULL(SUM(F.Fine_amt), 0) AS Fine_amt " +
+            String searchQuery = "SELECT B.Card_id, B.Bname, SUM(F.Fine_amt) AS Fine_Amt " +
                     "FROM BORROWER B " +
                     "LEFT JOIN BOOK_LOANS BL ON B.Card_id = BL.Card_id " +
                     "LEFT JOIN FINES F ON BL.Loan_id = F.Loan_id " +
@@ -195,7 +206,7 @@ public class Fines extends JFrame {
                     found = true;
                     int cardId = searchResult.getInt("Card_id");
                     String borrowerName = searchResult.getString("Bname");
-                    double totalFineAmount = searchResult.getDouble("Fine_Amt");
+                    double totalFineAmount = searchResult.getDouble("Fine_amt");
 
                     // Display results in the text area
                     searchResultsArea.setText("Card ID: " + cardId + ", Borrower Name: " + borrowerName + ", Total Fine Amount: $" + totalFineAmount + "\n");
@@ -214,6 +225,39 @@ public class Fines extends JFrame {
 
                 if (!found) {
                     searchResultsArea.setText("No results found for Card ID: " + searchText);
+                }
+            } catch (SQLException ex) {
+                handleException(ex, "Error executing search query");
+            }
+        });*/
+
+        searchButton.addActionListener(e -> {
+            String searchText = searchField.getText();
+
+            String searchQuery = "SELECT F.Loan_id, B.Bname, F.fine_amt " +
+                    "FROM FINES F " +
+                    "LEFT JOIN BOOK_LOANS BL ON F.Loan_id = BL.Loan_id " +
+                    "LEFT JOIN BORROWER B ON BL.Card_id = B.Card_id " +
+                    "WHERE F.Loan_id = ?";
+
+            try (PreparedStatement preparedStatement = connection.prepareStatement(searchQuery)) {
+                preparedStatement.setString(1, searchText);
+                ResultSet searchResult = preparedStatement.executeQuery();
+                boolean found = false;
+
+                while (searchResult.next()) {
+                    found = true;
+                    // Display results in the text area
+                    //int cardId = searchResult.getInt("Card_id");
+                    int loanId = searchResult.getInt("Loan_id");
+                    String borrowerName = searchResult.getString("Bname");
+                    double totalFineAmount = searchResult.getDouble("Fine_amt");
+
+                    searchResultsArea.append("Loan ID: " + loanId + ", Borrower Name: " + borrowerName + ", Total Fine Amount: $" + totalFineAmount + "\n");
+                }
+
+                if (!found) {
+                    searchResultsArea.setText("No results found for loan ID: " + searchText);
                 }
             } catch (SQLException ex) {
                 handleException(ex, "Error executing search query");
@@ -266,6 +310,7 @@ public class Fines extends JFrame {
         e.printStackTrace();
         JOptionPane.showMessageDialog(null, message);
     }
+
 
     public static void main(String[] args) {
         try {
