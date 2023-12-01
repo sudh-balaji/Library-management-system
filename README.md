@@ -24,6 +24,8 @@ Configure Build Path --> Libraries --> Add External JARs
 
 ### In addition to the jar file, you will use the java.sql, java.util, java.awt, and javax.swing libraries. In Eclipse, you may need to modify your module-info to include java.desktop to use javax.swing.
 
+### We used MacOS to develop the application but the application should work on all operating systems.
+
 
 
 
